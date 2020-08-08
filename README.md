@@ -62,17 +62,19 @@ services:
   streamripper:
     image: clue/streamripper
     restart: always
-    ports:
+    user: "${UID}:${GID}"
+#    ports:
 #     - 8000:8000 # optionally publish relay stream
     volumes:
-      - $HOME/MyMusic:/home/streamripper
+      - ./MyMusic:/home/streamripper
     command: http://mystation.local/radio.pls -s -m 30 --xs2 -o never -T
 ```
 
 You can then run this as a background service like this:
+If you run docker-compose the current Host User and Group will be used, to avoid permission issues with the Volume.
 
 ```bash
-$ docker-compose up -d
+$ UID=$(id -u) GID=$(id -g) docker-compose up -d
 ```
 
 If you want to access (share) the ripped MP3 files through a webbrowser, you may simply use the [clue/h5ai](https://github.com/clue/docker-h5ai) Docker image:
@@ -83,15 +85,16 @@ services:
   streamripper:
     image: clue/streamripper
     restart: always
+    user: "${UID}:${GID}"
     volumes:
-      - $HOME/MyMusic:/home/streamripper
+      - ./MyMusic:/home/streamripper
     command: http://mystation.local/radio.pls -s -m 30 --xs2 -o never -T
   web:
     image: clue/h5ai
     ports:
       - 80:80
     volumes:
-      - $HOME/MyMusic:/var/www
+      - ./MyMusic:/var/www
 ```
 
 When running this you will now be presented with a beautiful listing of all new songs:
